@@ -27,11 +27,6 @@ Trigger when threshhold crossed:
 * outbound and all devices are outside
 * inbound
 
-### TODO
-
-[] Figure out how to get locations.
-[] Figure out how to turn locations into a distance from home.
-
 ### Device States
 
 * outside
@@ -58,8 +53,18 @@ https://github.com/MilhouseVH/autoaway.py
 
 A python app that sets thermostat home/away based on device presence on the network.
 
+### locationsharinglib
+
+https://github.com/costastf/locationsharinglib
+
+A python library that logs into Google and gets location sharing data by
+scraping endpoints that appear intended for browser-based use.
+
 ### Google Maps API
+
+There doesn't appear to be a public API for accessing location sharing info.
+Please update this or file an issue if you find one!
 
 ### Venstar API
 
-
+http://developer.venstar.com/

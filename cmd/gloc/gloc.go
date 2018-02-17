@@ -1,20 +1,25 @@
 package main
 
 import (
-	"fmt"
-	"github.com/mhrivnak/stataway/pkg/gloc"
-	"os"
+	"github.com/mhrivnak/stataway/pkg/detectors/gps"
+	"github.com/mhrivnak/stataway/pkg/engine"
 )
 
 func main() {
-	username := os.Getenv("username")
-	password := os.Getenv("password")
+	stateC := make(chan engine.State)
+	triggerC := make(chan engine.Trigger)
 
-	fmt.Printf("authenticating as %s with %s\n", username, password)
-
-	err := gloc.Demo(username, password)
+	gpsD, err := gps.New(engine.State{true, false}, stateC, triggerC)
 	if err != nil {
-		fmt.Println("GOT AN ERROR")
-		fmt.Println(err.Error())
+		panic(err.Error())
 	}
+
+	go gpsD.Run()
+
+	err = engine.Run([]chan engine.State{stateC}, triggerC)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return
 }
