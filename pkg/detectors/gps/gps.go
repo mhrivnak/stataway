@@ -60,7 +60,7 @@ func New(state engine.State, stateC chan engine.State, triggerC chan engine.Trig
 			Longitude: lon,
 		},
 		innerDistance: 0.4,
-		outerDistance: 0.5,
+		outerDistance: 0.6,
 	}
 	return g, nil
 }
@@ -71,10 +71,15 @@ func (d *GPSDetector) checkLocations() {
 		fmt.Println(err.Error())
 		return
 	}
+
+	var minDist float64 = 100
 	for _, loc := range locations {
 		dist := loc.Distance(d.homeLocation)
+		if dist < minDist {
+			minDist = dist
+		}
 		fmt.Printf("%s is %f km from home.\n", loc.Name, dist)
-		if dist < d.outerDistance {
+		if dist < d.innerDistance {
 			if d.home == false {
 				d.home = true
 				d.triggerC <- engine.Trigger{"home", "gps", "inside home area"}
@@ -82,7 +87,7 @@ func (d *GPSDetector) checkLocations() {
 			return
 		}
 	}
-	if d.home == true {
+	if minDist > d.outerDistance && d.home == true {
 		d.home = false
 		d.triggerC <- engine.Trigger{"away", "gps", "outside home area"}
 	}
