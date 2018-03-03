@@ -2,13 +2,12 @@ package engine
 
 import (
 	"fmt"
-	"github.com/mhrivnak/stataway/pkg/thermostat"
+	"github.com/mhrivnak/stataway/pkg/thermostats"
 )
 
-func Run(stat thermostat.Thermostat, triggerC chan Trigger) error {
+func Run(stat thermostats.Thermostat, triggerC chan Trigger) error {
 
-	for {
-		t := <-triggerC
+	for t := range triggerC {
 		fmt.Println(t.String())
 		home, err := stat.Home()
 		if err != nil {
@@ -27,4 +26,5 @@ func Run(stat thermostat.Thermostat, triggerC chan Trigger) error {
 			fmt.Println("Set thermostat home state to:", t.Home)
 		}
 	}
+	return nil
 }

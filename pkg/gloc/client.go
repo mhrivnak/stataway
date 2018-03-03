@@ -16,6 +16,8 @@ const loginURL = "https://accounts.google.com/ServiceLogin"
 const emailURL = "https://accounts.google.com/signin/v1/lookup"
 const passwordURL = "https://accounts.google.com/signin/challenge/sl/password"
 
+// login creates a new http.Client, uses it to log into Google, then returns a
+// pointer to it
 func login(username, password string) (*http.Client, error) {
 	client, err := newClient()
 	if err != nil {
@@ -55,6 +57,8 @@ func login(username, password string) (*http.Client, error) {
 	return client, nil
 }
 
+// newClient returns a *http.Client with a cookiejar, a timeout of 30 seconds,
+// and a max of 15 redirects.
 func newClient() (*http.Client, error) {
 	options := cookiejar.Options{
 		PublicSuffixList: publicsuffix.List,
