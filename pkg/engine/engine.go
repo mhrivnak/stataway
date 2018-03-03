@@ -2,10 +2,10 @@ package engine
 
 import (
 	"fmt"
-	"github.com/mhrivnak/stataway/pkg/thermostat"
+	"github.com/mhrivnak/stataway/pkg/thermostats"
 )
 
-func Run(stat thermostat.Thermostat, triggerC chan Trigger) error {
+func Run(stat thermostats.Thermostat, triggerC chan Trigger) error {
 
 	for {
 		t := <-triggerC

@@ -14,15 +14,13 @@ type GPSDetector struct {
 	state         string
 	home          bool
 	client        *gloc.LocationClient
-	paused        bool
-	engStateC     chan engine.State
 	triggerC      chan engine.Trigger
 	homeLocation  gloc.Location
 	innerDistance float64
 	outerDistance float64
 }
 
-func New(state engine.State, triggerC chan engine.Trigger) (*GPSDetector, error) {
+func New(triggerC chan engine.Trigger) (*GPSDetector, error) {
 	username := os.Getenv("GOOGLE_USERNAME")
 	password := os.Getenv("GOOGLE_PASSWORD")
 	if username == "" || password == "" {
@@ -49,10 +47,9 @@ func New(state engine.State, triggerC chan engine.Trigger) (*GPSDetector, error)
 	}
 
 	d := &GPSDetector{
-		home:      state.Home,
-		paused:    state.Paused,
-		client:    client,
-		triggerC:  triggerC,
+		home:     true, // this will get set by Init() below
+		client:   client,
+		triggerC: triggerC,
 		homeLocation: gloc.Location{
 			Name:      "Home",
 			Latitude:  lat,
@@ -61,14 +58,25 @@ func New(state engine.State, triggerC chan engine.Trigger) (*GPSDetector, error)
 		innerDistance: 0.5,
 		outerDistance: 0.7,
 	}
-	return d, nil
+	err = d.Init()
+	return d, err
 }
 
-func (d *GPSDetector) checkLocations() {
+func (d *GPSDetector) Init() error {
+	minDist, err := d.smallestDistance()
+	if err != nil {
+		return err
+	}
+	// Assume if everyone is outside inner ring, that qualifies as "away" for
+	// startup purposes.
+	d.home = (minDist < d.innerDistance)
+	return nil
+}
+
+func (d *GPSDetector) smallestDistance() (float64, error) {
 	locations, err := d.client.Get()
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		return 0, err
 	}
 
 	var minDist float64 = 100 // an arbitrary value way above the threshold
@@ -78,6 +86,15 @@ func (d *GPSDetector) checkLocations() {
 			minDist = dist
 		}
 		fmt.Printf("%s is %f km from home.\n", loc.Name, dist)
+	}
+	return minDist, nil
+}
+
+func (d *GPSDetector) checkLocations() {
+	minDist, err := d.smallestDistance()
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 	if minDist < d.innerDistance {
 		if d.home == false {
@@ -92,16 +109,11 @@ func (d *GPSDetector) checkLocations() {
 
 func (d *GPSDetector) Run() {
 	tickerC := time.NewTicker(time.Second * 30).C
-	if !d.paused {
-		d.checkLocations()
-	}
 
 	for {
 		select {
 		case <-tickerC:
-			if !d.paused {
-				d.checkLocations()
-			}
+			d.checkLocations()
 		}
 	}
 }

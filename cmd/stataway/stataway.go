@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/mhrivnak/stataway/pkg/detectors/gps"
 	"github.com/mhrivnak/stataway/pkg/engine"
-	"github.com/mhrivnak/stataway/pkg/thermostat/venstar"
+	"github.com/mhrivnak/stataway/pkg/thermostats/venstar"
 )
 
 func main() {
@@ -14,7 +14,7 @@ func main() {
 		panic(err.Error())
 	}
 
-	gpsD, err := gps.New(engine.State{true, false}, triggerC)
+	gpsD, err := gps.New(triggerC)
 	if err != nil {
 		panic(err.Error())
 	}

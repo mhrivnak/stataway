@@ -1,4 +1,4 @@
-package thermostat
+package thermostats
 
 type Thermostat interface {
 	Set(bool) error
