@@ -6,17 +6,16 @@ import (
 )
 
 func main() {
-	stateC := make(chan engine.State)
 	triggerC := make(chan engine.Trigger)
 
-	gpsD, err := gps.New(engine.State{true, false}, stateC, triggerC)
+	gpsD, err := gps.New(engine.State{true, false}, triggerC)
 	if err != nil {
 		panic(err.Error())
 	}
 
 	go gpsD.Run()
 
-	err = engine.Run([]chan engine.State{stateC}, triggerC)
+	err = engine.Run(triggerC)
 	if err != nil {
 		panic(err.Error())
 	}

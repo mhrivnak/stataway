@@ -22,7 +22,7 @@ type GPSDetector struct {
 	outerDistance float64
 }
 
-func New(state engine.State, stateC chan engine.State, triggerC chan engine.Trigger) (*GPSDetector, error) {
+func New(state engine.State, triggerC chan engine.Trigger) (*GPSDetector, error) {
 	username := os.Getenv("GOOGLE_USERNAME")
 	password := os.Getenv("GOOGLE_PASSWORD")
 	if username == "" || password == "" {
@@ -48,21 +48,20 @@ func New(state engine.State, stateC chan engine.State, triggerC chan engine.Trig
 		return nil, err
 	}
 
-	g := &GPSDetector{
+	d := &GPSDetector{
 		home:      state.Home,
 		paused:    state.Paused,
 		client:    client,
-		engStateC: stateC,
 		triggerC:  triggerC,
 		homeLocation: gloc.Location{
 			Name:      "Home",
 			Latitude:  lat,
 			Longitude: lon,
 		},
-		innerDistance: 0.4,
-		outerDistance: 0.6,
+		innerDistance: 0.5,
+		outerDistance: 0.7,
 	}
-	return g, nil
+	return d, nil
 }
 
 func (d *GPSDetector) checkLocations() {
@@ -72,29 +71,27 @@ func (d *GPSDetector) checkLocations() {
 		return
 	}
 
-	var minDist float64 = 100
+	var minDist float64 = 100 // an arbitrary value way above the threshold
 	for _, loc := range locations {
 		dist := loc.Distance(d.homeLocation)
 		if dist < minDist {
 			minDist = dist
 		}
 		fmt.Printf("%s is %f km from home.\n", loc.Name, dist)
-		if dist < d.innerDistance {
-			if d.home == false {
-				d.home = true
-				d.triggerC <- engine.Trigger{"home", "gps", "inside home area"}
-			}
-			return
-		}
 	}
-	if minDist > d.outerDistance && d.home == true {
+	if minDist < d.innerDistance {
+		if d.home == false {
+			d.home = true
+			d.triggerC <- engine.Trigger{true, "gps", "inside home area"}
+		}
+	} else if minDist > d.outerDistance && d.home == true {
 		d.home = false
-		d.triggerC <- engine.Trigger{"away", "gps", "outside home area"}
+		d.triggerC <- engine.Trigger{false, "gps", "outside home area"}
 	}
 }
 
 func (d *GPSDetector) Run() {
-	tickerC := time.NewTicker(time.Minute).C
+	tickerC := time.NewTicker(time.Second * 30).C
 	if !d.paused {
 		d.checkLocations()
 	}
@@ -105,9 +102,6 @@ func (d *GPSDetector) Run() {
 			if !d.paused {
 				d.checkLocations()
 			}
-		case newState := <-d.engStateC:
-			d.home = newState.Home
-			d.paused = newState.Paused
 		}
 	}
 }
