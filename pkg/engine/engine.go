@@ -2,14 +2,10 @@ package engine
 
 import (
 	"fmt"
-	"github.com/mhrivnak/stataway/pkg/thermostat/venstar"
+	"github.com/mhrivnak/stataway/pkg/thermostat"
 )
 
-func Run(triggerC chan Trigger) error {
-	stat, err := venstar.NewThermostat()
-	if err != nil {
-		return err
-	}
+func Run(stat thermostat.Thermostat, triggerC chan Trigger) error {
 
 	for {
 		t := <-triggerC
@@ -32,4 +28,3 @@ func Run(triggerC chan Trigger) error {
 		}
 	}
 }
-
