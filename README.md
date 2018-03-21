@@ -16,9 +16,9 @@ be helpful without being a dependency or getting in the way.
 In addition to the detector-specific and thermostat-specific settings below,
 these configuration settings may be set as environment variables:
 
-**HOME_LATITUDE**: latitude of your home location in decimal format
+`HOME_LATITUDE`: latitude of your home location in decimal format
 
-**HOME_LONGITUDE**: longitude of your home location in decimal format
+`HOME_LONGITUDE`: longitude of your home location in decimal format
 
 ## Thermostats
 
@@ -30,7 +30,7 @@ like to assist in adding one.
 
 ### Settings
 
-**VENSTAR_URL**: URL to the thermostat's API
+`VENSTAR_URL`: URL to the thermostat's API
 
 ## Detectors
 
@@ -81,13 +81,13 @@ but only by a minute or less.
    that new account through Google Maps.
 1. Set the below environment variables when running stataway.
 
-**GOOGLE_USERNAME**: The full username for a Google account, usually an email address.
+`GOOGLE_USERNAME`: The full username for a Google account, usually an email address.
 
-**GOOGLE_PASSWORD**: The password for the account.
+`GOOGLE_PASSWORD`: The password for the account.
 
-**GOOGLE_INNER_KM**: The inner shell distance in kilometers, decimal values supported.
+`GOOGLE_INNER_KM`: The inner shell distance in kilometers, decimal values supported.
 
-**GOOGLE_OUTER_KM**: The outer shell distance in kilometers, decimal values supported.
+`GOOGLE_OUTER_KM`: The outer shell distance in kilometers, decimal values supported.
 
 ### Future Detectors
 
