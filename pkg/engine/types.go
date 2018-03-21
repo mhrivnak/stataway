@@ -9,5 +9,5 @@ type Trigger struct {
 }
 
 func (t Trigger) String() string {
-	return fmt.Sprintf("Trigger{Home: %s, DetectorName: %s, Reason: %s}", t.Home, t.DetectorName, t.Reason)
+	return fmt.Sprintf("Trigger{Home: %t, DetectorName: %s, Reason: %s}", t.Home, t.DetectorName, t.Reason)
 }

@@ -7,11 +7,15 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 )
 
+// NewThermostat returns a Thermostat object ready to use. It depends on the
+// environment variable VENSTAR_URL being set.
 func NewThermostat() (*Thermostat, error) {
-	u, err := url.Parse("http://192.168.17.2")
+	host := os.Getenv("VENSTAR_URL")
+	u, err := url.Parse(host)
 	if err != nil {
 		return nil, err
 	}
@@ -21,12 +25,13 @@ func NewThermostat() (*Thermostat, error) {
 	return &Thermostat{u, &client}, nil
 }
 
+// Thermostat holds data about a physical thermostat on the network.
 type Thermostat struct {
 	url    *url.URL
 	client *http.Client
 }
 
-// Set - sets the thermostat's away mode
+// Set sets the thermostat's away mode
 func (t *Thermostat) Set(home bool) error {
 	path, err := url.Parse("settings")
 	if err != nil {
@@ -60,6 +65,8 @@ func (t *Thermostat) Set(home bool) error {
 	return result.OK()
 }
 
+// Home queries the thermostat and returns a bool indicating whether it is in
+// "home" mode or not.
 func (t *Thermostat) Home() (bool, error) {
 	path, err := url.Parse("query/info")
 	if err != nil {
@@ -82,12 +89,16 @@ func (t *Thermostat) Home() (bool, error) {
 	return i.Home()
 }
 
+// Info holds response data from a GET request to the API's "query/info"
+// endpoint.
 type Info struct {
 	Away   int
 	Error  bool
 	Reason string
 }
 
+// Home returns a bool indicating whether the thermostat is in "home" mode or
+// not.
 func (i Info) Home() (bool, error) {
 	if i.Error {
 		message := fmt.Sprintf("thermostat returned error when queried: %s", i.Reason)
@@ -105,12 +116,16 @@ func (i Info) Home() (bool, error) {
 	}
 }
 
+// Result holds response data from a POST request to the API's "settings"
+// endpoint.
 type Result struct {
 	Success bool
 	Error   bool
 	Reason  string
 }
 
+// OK returns nil if the response was ok, or an error if there was any problem
+// with the response.
 func (r Result) OK() error {
 	if r.Error {
 		message := fmt.Sprintf("thermostat returned error when being set: %s", r.Reason)

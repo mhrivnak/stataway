@@ -7,8 +7,7 @@ import (
 
 func Run(stat thermostats.Thermostat, triggerC chan Trigger) error {
 
-	for {
-		t := <-triggerC
+	for t := range triggerC {
 		fmt.Println(t.String())
 		home, err := stat.Home()
 		if err != nil {
@@ -27,4 +26,5 @@ func Run(stat thermostats.Thermostat, triggerC chan Trigger) error {
 			fmt.Println("Set thermostat home state to:", t.Home)
 		}
 	}
+	return nil
 }
